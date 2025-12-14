@@ -340,7 +340,7 @@ const GridConfig: React.FC = () => {
                   <div style={{ textAlign: 'center' }}>
                     <Text type="secondary" style={{ fontSize: 12 }}>当前价</Text>
                     <div style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginTop: 4 }}>
-                      ${marketData.currentPrice.toFixed(2)}
+                      {formatPriceWithSymbol(marketData.currentPrice)}
                     </div>
                   </div>
                 </Col>
@@ -361,7 +361,7 @@ const GridConfig: React.FC = () => {
                   <div style={{ textAlign: 'center' }}>
                     <Text type="secondary" style={{ fontSize: 12 }}>成本价</Text>
                     <div style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginTop: 4 }}>
-                      ${marketData.costPrice.toFixed(2)}
+                      {formatPriceWithSymbol(marketData.costPrice)}
                     </div>
                   </div>
                 </Col>
@@ -372,7 +372,7 @@ const GridConfig: React.FC = () => {
                   <div style={{ textAlign: 'center' }}>
                     <Text type="secondary" style={{ fontSize: 12 }}>24H最高</Text>
                     <div style={{ fontSize: 14, fontWeight: 500, color: '#111827', marginTop: 4 }}>
-                      ${marketData.highPrice.toFixed(2)}
+                      {formatPriceWithSymbol(marketData.highPrice)}
                     </div>
                   </div>
                 </Col>
@@ -380,7 +380,7 @@ const GridConfig: React.FC = () => {
                   <div style={{ textAlign: 'center' }}>
                     <Text type="secondary" style={{ fontSize: 12 }}>24H最低</Text>
                     <div style={{ fontSize: 14, fontWeight: 500, color: '#111827', marginTop: 4 }}>
-                      ${marketData.lowPrice.toFixed(2)}
+                      {formatPriceWithSymbol(marketData.lowPrice)}
                     </div>
                   </div>
                 </Col>

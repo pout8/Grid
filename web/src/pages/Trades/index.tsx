@@ -39,6 +39,7 @@ import {
   type TradeSummary,
   type TradeSymbol,
 } from '@/api/trades';
+import { formatPrice, formatPriceWithSymbol } from '@/utils/formatPrice';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -167,7 +168,7 @@ const Trades: React.FC = () => {
       width: 120,
       align: 'right',
       render: (price: number) => (
-        <span style={{ fontFamily: 'monospace' }}>${price.toFixed(2)}</span>
+        <span style={{ fontFamily: 'monospace' }}>{formatPriceWithSymbol(price)}</span>
       ),
     },
     {
@@ -187,7 +188,7 @@ const Trades: React.FC = () => {
       width: 120,
       align: 'right',
       render: (total: number) => (
-        <span style={{ fontFamily: 'monospace' }}>${total.toFixed(2)}</span>
+        <span style={{ fontFamily: 'monospace' }}>{formatPriceWithSymbol(total)}</span>
       ),
     },
     {
@@ -217,7 +218,7 @@ const Trades: React.FC = () => {
       align: 'right',
       render: (fee: number) => (
         <span style={{ fontFamily: 'monospace', color: '#999' }}>
-          {fee.toFixed(2)}
+          {formatPrice(fee)}
         </span>
       ),
     },
@@ -261,11 +262,11 @@ const Trades: React.FC = () => {
         dayjs(trade.timestamp).format('YYYY-MM-DD HH:mm:ss'),
         trade.symbol,
         trade.side,
-        trade.price.toFixed(2),
+        formatPrice(trade.price),
         trade.amount.toFixed(4),
-        trade.total.toFixed(2),
-        trade.profit.toFixed(2),
-        trade.fee.toFixed(2),
+        formatPrice(trade.total),
+        formatPrice(trade.profit),
+        formatPrice(trade.fee),
         trade.order_id || '',
       ]);
 
@@ -474,13 +475,13 @@ const Trades: React.FC = () => {
               {dayjs(selectedTrade.timestamp).format('YYYY-MM-DD HH:mm:ss')}
             </Descriptions.Item>
             <Descriptions.Item label="价格">
-              ${selectedTrade.price.toFixed(2)}
+              {formatPriceWithSymbol(selectedTrade.price)}
             </Descriptions.Item>
             <Descriptions.Item label="数量">
               {selectedTrade.amount.toFixed(4)}
             </Descriptions.Item>
             <Descriptions.Item label="成交额" span={2}>
-              ${selectedTrade.total.toFixed(2)}
+              {formatPriceWithSymbol(selectedTrade.total)}
             </Descriptions.Item>
             <Descriptions.Item label="盈亏">
               <span
@@ -490,11 +491,11 @@ const Trades: React.FC = () => {
                 }}
               >
                 {selectedTrade.profit >= 0 ? '+' : ''}
-                {selectedTrade.profit.toFixed(2)} USDT
+                {formatPrice(selectedTrade.profit)} USDT
               </span>
             </Descriptions.Item>
             <Descriptions.Item label="手续费">
-              {selectedTrade.fee.toFixed(2)} USDT
+              {formatPrice(selectedTrade.fee)} USDT
             </Descriptions.Item>
             {selectedTrade.order_id && (
               <Descriptions.Item label="订单ID" span={2}>

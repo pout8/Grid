@@ -48,6 +48,7 @@ import SSEStatusIndicator from '@/components/SSEStatusIndicator';
 import GlassCard from '@/components/GlassCard';
 import CountUp from '@/components/CountUp';
 import { modernTheme } from '@/styles/modernTheme';
+import { formatPrice, formatPriceWithSymbol } from '@/utils/formatPrice';
 
 const { Text } = Typography;
 
@@ -303,7 +304,7 @@ const Home: React.FC = () => {
             border: `1px solid ${modernTheme.colors.primary}33`,
           }}
         >
-          ${price.toFixed(2)}
+          {formatPriceWithSymbol(price)}
         </Text>
       ),
     },
@@ -349,7 +350,7 @@ const Home: React.FC = () => {
           fontWeight: 'bold',
           color: profit >= 0 ? modernTheme.colors.success : modernTheme.colors.danger,
         }}>
-          {profit >= 0 ? '+' : ''}{profit.toFixed(2)} USDT
+          {profit >= 0 ? '+' : ''}{formatPrice(profit)} USDT
         </div>
       ),
     },
@@ -426,7 +427,7 @@ const Home: React.FC = () => {
       key: 'price',
       render: (price) => (
         <Text style={{ color: modernTheme.colors.primary }}>
-          ${price.toFixed(2)}
+          {formatPriceWithSymbol(price)}
         </Text>
       ),
     },
@@ -451,7 +452,7 @@ const Home: React.FC = () => {
             color: profit >= 0 ? modernTheme.colors.success : modernTheme.colors.danger,
           }}
         >
-          {profit >= 0 ? '+' : ''}{profit.toFixed(2)} USDT
+          {profit >= 0 ? '+' : ''}{formatPrice(profit)} USDT
         </Text>
       ),
     },

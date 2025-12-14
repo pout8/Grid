@@ -295,20 +295,17 @@ def initialize_database():
             logger.error("✗ 数据库健康检查失败")
             return False
 
-        logger.info("
-" + "=" * 60)
+        logger.info("\n" + "=" * 60)
         logger.info("✅ 数据库初始化完成！")
         logger.info("=" * 60)
-        logger.info("
-下一步")
+        logger.info("\n下一步")
         logger.info("1. 启动 Web 服务： python -m src.services.fastapi_server")
         logger.info("2. 访问配置页面: http://localhost:8000")
         logger.info("3. 使用默认账号登录: admin / admin123")
         logger.info("4. ⚠️  立即修改默认密码！")
         logger.info("5. 在 Web 控制台中填写交易所 API 密钥和策略参数")
         logger.info("6. 使用 /api/configs/reload 热更新配置")
-        logger.info("7. 启动交易系统
-")
+        logger.info("7. 启动交易系统\n")
 
         
         return True

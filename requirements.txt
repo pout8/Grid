@@ -16,7 +16,8 @@ loguru>=0.7.2
 python-jose>=3.3.0
 passlib>=1.7.4
 # bcrypt backend for passlib password hashing/verification
-bcrypt>=4.2.0
+# 使用3.2.0版本以兼容passlib 1.7.4
+bcrypt==3.2.0
 python-multipart>=0.0.6
 pytest>=7.4.0
 pytest-asyncio>=0.21.0

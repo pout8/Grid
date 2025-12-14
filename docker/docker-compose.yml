@@ -4,12 +4,12 @@ services:
   # GridBNB 交易机器人服务
   gridbnb-bot:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: gridbnb-bot
     restart: always
-    env_file:
-      - .env
+    # env_file:
+    #   - .env  # .env文件不存在，使用应用内置配置
     # 内部端口，不直接暴露给外部
     expose:
       - "58181"
@@ -17,12 +17,12 @@ services:
     # ports:
     #   - "8080:58181"  # 已注释：防止绕过Nginx的直接访问
     volumes:
-      - ./:/app
+      - ../:/app
       - ./data:/app/data  # 持久化数据目录
     networks:
       - gridbnb-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:58181/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:58181/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -32,8 +32,8 @@ services:
     image: prom/prometheus:latest
     container_name: gridbnb-prometheus
     restart: always
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -58,8 +58,8 @@ services:
     image: grafana/grafana:latest
     container_name: gridbnb-grafana
     restart: always
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro

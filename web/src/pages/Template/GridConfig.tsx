@@ -33,6 +33,7 @@ import {
   CheckOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { formatPriceWithSymbol } from '@/utils/formatPrice';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

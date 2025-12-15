@@ -17,7 +17,7 @@ const GridConfig = lazy(() => import('@/pages/Template/GridConfig'));
 const AIConfig = lazy(() => import('@/pages/Template/AIConfig'));
 const GlobalSettings = lazy(() => import('@/pages/Settings/Global'));
 const UserProfile = lazy(() => import('@/pages/User/Profile'));
-const Logs = lazy(() => import('@/pages/Logs'));
+// const Logs = lazy(() => import('@/pages/Logs')); // 模块不存在，已注释
 const Trades = lazy(() => import('@/pages/Trades'));
 
 // 路由配置
@@ -62,10 +62,11 @@ const routes: RouteObject[] = [
         path: 'templates/ai/:id',
         element: <AIConfig />,
       },
-      {
-        path: 'logs',
-        element: <Logs />,
-      },
+      // Logs路由已注释 - 模块不存在
+      // {
+      //   path: 'logs',
+      //   element: <Logs />,
+      // },
       {
         path: 'trades',
         element: <Trades />,

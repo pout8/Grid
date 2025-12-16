@@ -42,11 +42,18 @@ COPY requirements.txt .
 # 安装Python依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制项目文件
-COPY . .
-
-# 从第一阶段复制构建好的前端
+# 从第一阶段复制构建好的前端（在复制项目文件之前）
 COPY --from=frontend-builder /build/dist /app/web/dist
+
+# 复制项目文件（分步复制以避免覆盖 web/dist）
+COPY src/ /app/src/
+COPY config/ /app/config/
+COPY scripts/ /app/scripts/
+COPY docker/ /app/docker/
+COPY *.py /app/
+COPY requirements*.txt /app/
+COPY *.md /app/
+COPY LICENSE /app/
 
 # 创建必要的目录
 RUN mkdir -p /app/data /app/logs

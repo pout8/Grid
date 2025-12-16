@@ -28,32 +28,16 @@ WORKDIR /app
 # 设置时区
 ENV TZ=Asia/Shanghai
 
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
-    curl \
-    tzdata \
-    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
-    && echo $TZ > /etc/timezone \
-    && rm -rf /var/lib/apt/lists/*
-
 # 复制依赖文件
 COPY requirements.txt .
 
 # 安装Python依赖
 RUN pip install --no-cache-dir -r requirements.txt
-
+COPY . .
 # 从第一阶段复制构建好的前端（在复制项目文件之前）
 COPY --from=frontend-builder /build/dist /app/web/dist
 
-# 复制项目文件（分步复制以避免覆盖 web/dist）
-COPY src/ /app/src/
-COPY config/ /app/config/
-COPY scripts/ /app/scripts/
-COPY docker/ /app/docker/
-COPY *.py /app/
-COPY requirements*.txt /app/
-COPY *.md /app/
-COPY LICENSE /app/
+
 
 # 创建必要的目录
 RUN mkdir -p /app/data /app/logs

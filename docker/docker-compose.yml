@@ -4,25 +4,25 @@ services:
   # GridBNB 交易机器人服务
   gridbnb-bot:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: ..              # 构建上下文为项目根目录
+      dockerfile: docker/Dockerfile   # Dockerfile 在 docker/ 目录下
     container_name: gridbnb-bot
     restart: always
-    # env_file:
-    #   - .env  # .env文件不存在，使用应用内置配置
-    # 内部端口，不直接暴露给外部
+    env_file:
+      - ../config/.env         # 环境变量文件在项目根目录的 config/.env
     expose:
-      - "58181"
-    # 生产环境安全配置：移除直接端口映射，只允许通过Nginx访问
-    # ports:
-    #   - "8080:58181"  # 已注释：防止绕过Nginx的直接访问
+      - "58181"                # 只在 Docker 内部网络暴露端口
     volumes:
-      - ../:/app
-      - ./data:/app/data  # 持久化数据目录
+      # 精细挂载模式：只挂载必要的源代码目录，避免覆盖容器内构建的前端文件
+      # 注意：不要挂载 web/ 目录，让容器使用内置构建的前端
+      - ../src:/app/src                    # 后端源代码
+      - ../config:/app/config              # 配置文件
+      - ../scripts:/app/scripts            # 脚本文件
+      - ./data:/app/data                   # 数据目录
     networks:
-      - gridbnb-network
+      - 1panel-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:58181/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:58181/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -33,7 +33,7 @@ services:
     container_name: gridbnb-prometheus
     restart: always
     expose:
-      - "9090"
+      - "9090"                 # 只在 Docker 内部网络暴露端口
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -41,12 +41,11 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=30d'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.external-url=https://ban.444483.xyz/prometheus/'
     depends_on:
       - gridbnb-bot
     networks:
-      - gridbnb-network
+      - 1panel-network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
       interval: 30s
@@ -59,57 +58,33 @@ services:
     container_name: gridbnb-grafana
     restart: always
     expose:
-      - "3000"
+      - "3000"                 # 只在 Docker 内部网络暴露端口
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-      - GF_INSTALL_PLUGINS=
-      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=your_grafana_password_here
+      - GF_SERVER_ROOT_URL=https://ban.444483.xyz/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
       - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:
       - prometheus
     networks:
-      - gridbnb-network
+      - 1panel-network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Nginx 反向代理服务
-  nginx:
-    image: nginx:alpine
-    container_name: gridbnb-nginx
-    restart: always
-    ports:
-      - "80:80"  # 外部访问端口
-      - "443:443"  # 为将来的HTTPS准备
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/logs:/var/log/nginx
-    depends_on:
-      - gridbnb-bot
-      - grafana
-    networks:
-      - gridbnb-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-# 定义持久化卷
 volumes:
   prometheus-data:
     driver: local
   grafana-data:
     driver: local
 
-# 定义网络
+# 使用 1panel 外部网络
 networks:
-  gridbnb-network:
-    driver: bridge
+  1panel-network:
+    external: true

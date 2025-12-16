@@ -121,6 +121,12 @@ data/
 *.log
 *.log.*
 
+# Docker Compose 本地配置
+docker-compose.override.yml
+docker-compose.local.yml
+docker/docker-compose.override.yml
+docker/docker-compose.local.yml
+
 # 测试覆盖率
 coverage.json
 

@@ -63,6 +63,16 @@ def create_app(traders: dict = None, trader_registry=None) -> FastAPI:
             "service": "GridBNB Trading System",
             "version": "v3.2.0"
         }
+    
+    # Nginx兼容端点（无/api前缀）
+    @app.get("/health")
+    async def health_check_nginx():
+        """健康检查（Nginx兼容）"""
+        return {
+            "status": "healthy",
+            "service": "GridBNB Trading System",
+            "version": "v3.2.0"
+        }
 
     # ====== 3. 注册路由 ======
     from src.fastapi_app.routers import (
@@ -101,26 +111,69 @@ def create_app(traders: dict = None, trader_registry=None) -> FastAPI:
 
     # ====== 4. 配置静态文件服务（前端） ======
     web_dist = Path(__file__).parent.parent.parent / "web" / "dist"
+    logger.info("=" * 60)
+    logger.info("🔍 前端构建目录检查:")
+    logger.info(f"   路径: {web_dist}")
+    logger.info(f"   绝对路径: {web_dist.absolute()}")
+    logger.info(f"   目录是否存在: {web_dist.exists()}")
 
     if web_dist.exists():
-        # 静态资源（CSS, JS, images 等）
-        app.mount("/assets", StaticFiles(directory=str(web_dist / "assets")), name="static")
-        logger.info(f"✓ 静态文件目录: {web_dist}")
+        # 列出dist目录内容以便调试
+        try:
+            dist_files = list(web_dist.iterdir())
+            logger.info(f"   dist目录内容: {[f.name for f in dist_files[:10]]}")
+        except Exception as e:
+            logger.warning(f"   无法列出dist目录: {e}")
+        
+        # 静态资源（CSS, JS, images等）
+        assets_dir = web_dist / "assets"
+        if assets_dir.exists():
+            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="static")
+            logger.info(f"✓ 静态文件目录已挂载: /assets -> {assets_dir}")
+        else:
+            logger.warning(f"⚠ assets目录不存在: {assets_dir}")
 
-        # SPA 路由：所有非 API 请求都返回 index.html（必须最后注册）
-        @app.get("/{full_path:path}")
-        async def serve_spa(full_path: str):
-            """服务前端 SPA 应用"""
-            # 返回 index.html
-            index_file = web_dist / "index.html"
-            if index_file.exists():
+        # SPA路由：所有非API请求都返回index.html（必须最后注册）
+        index_file = web_dist / "index.html"
+        if index_file.exists():
+            @app.get("/{full_path:path}")
+            async def serve_spa(full_path: str):
+                """服务前端SPA应用"""
                 return FileResponse(index_file)
-            return {"detail": "Frontend not built"}
-
-        logger.info("✓ 前端 SPA 路由已配置")
+            logger.info("✓ 前端SPA路由已配置")
+            logger.info(f"✓ index.html: {index_file}")
+        else:
+            logger.error(f"❌ index.html不存在: {index_file}")
+            logger.error("   前端将无法正常访问!")
     else:
-        logger.warning(f"⚠ 前端构建目录不存在: {web_dist}")
-        logger.warning("  请运行: cd web && npm run build")
+        logger.error("=" * 60)
+        logger.error(f"❌ 前端构建目录不存在: {web_dist}")
+        logger.error("=" * 60)
+        logger.error("这将导致Web界面无法访问!")
+        logger.error("可能原因:")
+        logger.error("  1. Docker构建时前端编译失败")
+        logger.error("  2. COPY指令路径错误")
+        logger.error("  3. 前端构建产物路径不是 'dist'")
+        logger.error("")
+        logger.error("请检查:")
+        logger.error("  - Dockerfile第49行: COPY --from=frontend-builder /build/dist /app/web/dist")
+        logger.error("  - 前端构建是否成功: npm run build")
+        logger.error("  - 前端构建输出目录配置(vite.config.ts)")
+        logger.error("=" * 60)
+
+        # 添加兜底路由，返回友好的错误信息
+        @app.get("/")
+        async def root_fallback():
+            return {
+                "error": "Frontend not built",
+                "message": "前端构建目录不存在，Web界面无法访问",
+                "expected_path": str(web_dist.absolute()),
+                "troubleshooting": {
+                    "check_docker_build": "检查Docker构建日志中前端编译是否成功",
+                    "check_copy_instruction": "验证Dockerfile中COPY指令是否正确",
+                    "check_build_output": "确认前端构建输出目录配置"
+                }
+            }
 
     logger.info("=" * 60)
     logger.info("FastAPI 应用创建完成")

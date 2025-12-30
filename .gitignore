@@ -143,7 +143,13 @@ scripts/archive/
 update_git.ps1
 
 # Claude Code 本地配置
-.claude/settings.local.json
+.claude/
+
+# Serena 本地配置
+.serena/
 
 # Spec Workflow 会话数据
-.spec-workflow/session.json
+.spec-workflow/
+
+# 重构摘要文档
+RESTRUCTURE_SUMMARY.md
